@@ -1,0 +1,124 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from keras.models import Sequential
+from keras.layers import Dense
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+np.random.seed(42)
+n_samples = 200
+
+marcas = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan']
+anos = np.random.randint(2000, 2023, n_samples)
+potencias = np.random.uniform(100, 300, n_samples)
+quilometragens = np.random.randint(10000, 150000, n_samples)
+
+precos = []
+for i in range(n_samples):
+  marca = np.random.choice(marcas)
+  preco_base = 20000
+  preco = preco_base
+  if marca == 'Toyota':
+    preco *= 1.1
+  elif marca == 'Honda':
+    preco *= 1.08
+  elif marca == 'Nissan':
+    preco *= 1.05
+  if anos[i] > 2015:
+    preco *= 1.05
+  if potencias[i] > 150:
+    preco *= 1.02
+  precos.append(preco)
+
+data = {
+    'Marca': [marca for marca in np.random.choice(marcas, n_samples)],
+    'Ano': anos,
+    'Potencia': potencias,
+    'Quilometragem': quilometragens,
+    'Preco': precos
+}
+
+dataframe = pd.DataFrame(data)
+
+
+
+encoder_marca = OrdinalEncoder()
+dataframe['Marca'] = encoder_marca.fit_transform(dataframe['Marca'].values.reshape(-1,1))
+scaler_potencia = MinMaxScaler()
+dataframe['Potencia'] = scaler_potencia.fit_transform(dataframe['Potencia'].values.reshape(-1,1))
+scaler_quilo = MinMaxScaler()
+dataframe['Quilometragem'] = scaler_quilo.fit_transform(dataframe['Quilometragem'].values.reshape(-1,1))
+
+dataframe
+
+
+x = dataframe.drop('Preco', axis=1)
+y = dataframe['Preco']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+model = Sequential()
+model.add(Dense(32, input_dim=4, activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1, activation='linear'))
+
+model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mae'])
+
+history = model.fit(x_train, y_train, epochs=100, batch_size=32, verbose=2, validation_data=(x_test, y_test) )
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Histórico de Loss')
+plt.xlabel('Épocas')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['val_mae'], label='Validation MAE')
+plt.title('Histórico de Acurácia')
+plt.xlabel('Épocas')
+plt.ylabel('MAE')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+loss = model.evaluate(x_test, y_test)[1]
+print(f'Loss do modelo: {loss}')
+
+quilometragem = [60000]
+quilometragem_scalonada = scaler_quilo.transform([quilometragem])[0][0]
+quilometragem_scalonada
+
+potencia = [200]
+potencia_scalonada = scaler_potencia.transform([potencia])[0][0]
+potencia_scalonada
+
+potencia = [200]
+potencia_scalonada = scaler_potencia.transform([potencia])[0][0]
+potencia_scalonada
+
+potencia = [200]
+potencia_scalonada - scaler_potencia.transform([potencia])[0][0]
+potencia_scalonada
+
+ano = 2019
+marca = ['Toyota']
+marca_cat = encoder_marca.transform([marca])[0][0]
+marca_cat
+
+entrada_modelo = np.array([[marca_cat, ano, potencia_scalonada, quilometragem_scalonada]])
+entrada_modelo
+
+preco = model.predict(entrada_modelo)
+
+preco
+
+dataframe
