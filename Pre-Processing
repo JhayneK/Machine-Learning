@@ -1,0 +1,155 @@
+import pandas as pd
+import numpy as np
+
+dataframe = pd.read_csv('titanic.csv',index_col=False)
+
+dataframe.head(7)
+
+dataframe.tail(10)
+
+dataframe.drop([0,1])
+
+
+dataframe.drop('Age', axis=1)
+
+dataframe.shape
+
+dataframe.index
+
+dataframe.columns
+
+dataframe.info
+
+dataframe.describe()
+
+dataframe.min()
+
+dataframe.max()
+
+dataframe.sum()
+
+dataframe['Age']
+
+dataframe['Age'].min()
+
+dataframe['Age'].max()
+
+dataframe.drop(['Ticket', 'Cabin'] , axis=1, inplace = True)
+
+dataframe
+
+from sklearn import preprocessing
+
+scaler = preprocessing.StandardScaler()
+
+fare = dataframe['Fare'].values
+
+fare
+
+fare_scaled = scaler.fit_transform(fare.reshape(-1, 1))
+
+fare_scaled
+
+dataframe['Fare_StandardScaler'] = fare_scaled
+
+dataframe.head()
+
+scaler = preprocessing.MinMaxScaler()
+
+fare_scaled = scaler.fit_transform(fare.reshape(-1, 1))
+
+dataframe['Fare_MinMaxScaler'] = fare_scaled
+
+dataframe.head()
+
+encoder = preprocessing.OrdinalEncoder()
+
+sex = dataframe['Sex'].values
+
+sex_encoder = encoder.fit_transform(sex.reshape(-1, 1))
+
+dataframe['Sex_OrdinalEncoder'] = sex_encoder
+
+dataframe.head()
+
+one_hot_encoder = preprocessing.OneHotEncoder()
+
+sex_one_hot_encoder = one_hot_encoder.fit_transform(dataframe['Sex'].values.reshape(-1, 1))
+
+
+one_hot_encoder.get_feature_names_out(['Sex'])
+
+sex_one_hot_encoder_values = sex_one_hot_encoder.toarray()
+
+sex_one_hot_encoder_values.shape
+
+dataframe[one_hot_encoder.get_feature_names_out(['Sex'])] = sex_one_hot_encoder_values
+
+dataframe
+
+dataframe.isnull().sum()
+
+dataframe['Embarked'].fillna('Teste', inplace=True)
+
+dataframe['Age'].mean()
+
+dataframe['Age'].fillna(dataframe['Age'].mean(), inplace = True)
+
+dataframe.isnull().sum()
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+sns.boxplot(x = dataframe['Fare'])
+
+hi_filter = dataframe['Fare'].quantile(0.99)
+
+hi_filter
+
+lo_filter = dataframe['Fare'].quantile(0.1)
+
+lo_filter
+
+dataframe = dataframe[(dataframe['Fare']>lo_filter) & (dataframe['Fare']<hi_filter)]
+
+sns.boxplot(x = dataframe['Fare'])
+
+dataframe.corr(method = 'pearson')
+
+a4_dim = (11.7, 8.27)
+
+fig, ax = plt.subplots(figsize = a4_dim)
+
+sns.heatmap(dataframe.corr(method = 'pearson'), annot=True)
+
+dataframe.corr(method = 'spearman')
+
+a4_dim = (11.7, 8.27)
+
+fig, ax = plt.subplots(figsize = a4_dim)
+
+sns.heatmap(dataframe.corr(method = 'spearman'),annot=True)
+
+from sklearn.model_selection import train_test_split
+
+dataframe
+
+x = dataframe[['Age', 'Fare_MinMaxScaler', 'Sex_OrdinalEncoder']]
+
+y = dataframe['Survived']
+
+
+y
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
+
+x_train
+
+y_train
+
+x_test
+
+y_test
+
